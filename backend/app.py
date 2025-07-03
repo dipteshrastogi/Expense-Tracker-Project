@@ -19,16 +19,22 @@ allowed_origins = [
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
 
+import models
+
 with app.app_context():
     db.create_all() 
 
+from routes.auth_route import auth_bp
+
 CORS(app, origins = allowed_origins)
 
-print("Flask-JWT-Extended is working!")
+print(app.config["SQLALCHEMY_DATABASE_URI"])
 
-@app.route('/')
+@app.route('/hola')
 def index():
     return jsonify(msg="Hola amigos"), 200
+
+app.register_blueprint(auth_bp, url_prefix='/auth')
 
 asgi_app = WsgiToAsgi(app)
 

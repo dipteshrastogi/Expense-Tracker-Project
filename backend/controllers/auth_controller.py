@@ -1,8 +1,8 @@
 from flask import jsonify
 from models import User
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, set_access_cookies
 from sqlalchemy.exc import IntegrityError
-from extensions import async_session  # an AsyncSession factory
+from utils.extensions import async_session  # an AsyncSession factory
 
 async def register_user(data):
     """Create a new user from JSON data {username, password}."""
@@ -24,17 +24,20 @@ async def register_user(data):
             new_user.set_password(password)
             session.add(new_user)
             await session.commit()
+            access_token = create_access_token(identity=str(new_user.id))
 
     except IntegrityError:
         return jsonify(msg="Username already exists (race)"), 400
     
     except Exception as e:
         print(e)
-        # Catch-all for unexpected errors
-        # You might log e with your logger here
         return jsonify(msg="Internal server error"), 500
 
-    return jsonify(msg="User created"), 201
+    res =  jsonify(msg="User Registered Successfully", access_token=access_token)
+    res.status_code = 200
+    set_access_cookies(res, access_token)
+
+    return res
 
 
 async def login_user(data):
@@ -62,9 +65,15 @@ async def login_user(data):
                 return jsonify(msg="Invalid credentials"), 401
 
             # Create JWT token
-            # access_token = create_access_token(identity=user.id)
+            access_token = create_access_token(identity=str(user.id))
     except Exception as e:
-        # Log the exception e if you have logging set up
         return jsonify(msg="Internal server error"), 500
 
-    return jsonify(msg="User Logged in successfully"), 200
+    res =  jsonify(msg="User Logged in successfully", access_token=access_token)
+    res.status_code = 200
+    set_access_cookies(res, access_token)
+
+    return res
+
+# make_response() is a utility to turn almost anything(string, dict, tuple) into a Response object. 
+    

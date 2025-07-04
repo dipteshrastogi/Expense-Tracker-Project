@@ -3,7 +3,7 @@ from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from asgiref.wsgi import WsgiToAsgi
-from config import ProductionConfig, DevelopmentConfig
+from utils.config import ProductionConfig, DevelopmentConfig
 from flask_cors import CORS
 
 import os
@@ -12,12 +12,17 @@ app.config.from_object(
     ProductionConfig if os.getenv('FLASK_ENV') == 'production' else DevelopmentConfig
 )
 
+# Flask‑JWT‑Extended picks up that JWT_SECRET_KEY from app.config.
+
 allowed_origins = [
     "http://localhost:5000"
 ]
 
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
+
+# Without calling JWTManager(app) (or equivalently jwt.init_app(app)), your app would know the secret key,
+# but none of the machinery that actually creates, verifies, or enforces JWTs would be registered.
 
 import models
 

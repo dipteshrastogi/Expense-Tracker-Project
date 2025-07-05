@@ -11,6 +11,13 @@ class Config:
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'jwt-secret-key')
     JWT_TOKEN_LOCATION  = ['headers', 'cookies']
     JWT_ACCESS_COOKIE_NAME = 'access_token'
+    SMTP_HOST        = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    SMTP_PORT        = int(os.getenv("SMTP_PORT", 587))
+    SMTP_USER        = os.getenv("SMTP_USER", "")
+    SMTP_PASS        = os.getenv("SMTP_PASS", "")
+
+    # Savings threshold (numeric)
+    SAVINGS_THRESHOLD = float(os.getenv("SAVINGS_THRESHOLD", 5000.0))
 
 class DevelopmentConfig(Config):
     DEBUG = True

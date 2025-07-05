@@ -10,10 +10,11 @@ class User(db.Model):
     username  = db.Column(db.String(30), nullable=False, unique=True)
     email     = db.Column(db.String(120), nullable=False, unique=True)
     password_hash = db.Column(db.LargeBinary(60), nullable=False) #bcrypt hashes are bytes
+    income      = db.Column(db.String(50), nullable=False, default=0)
 
     # OPTIONAL: lets you do u.categories and u.expenses
     # categories = db.relationship('Category', backref='owner', lazy=True)
-    expenses   = db.relationship('Expense',  backref='spender', lazy=True)
+    expenses   = db.relationship('Expense',  backref='spender', lazy='selectin')
 
     def set_password(self, password: str):
         """Hash a plaintext password and store the binary result."""
@@ -53,7 +54,6 @@ class Expense(db.Model):
     title       = db.Column(db.String(120),   nullable=False, default="Title")
     amount      = db.Column(db.Float,   nullable=False)
     category    = db.Column(db.String(50), nullable=False)
-    income      = db.Column(db.String(50), nullable=False, default=0)
     timestamp   = db.Column(db.DateTime, default=datetime.utcnow)
     
 

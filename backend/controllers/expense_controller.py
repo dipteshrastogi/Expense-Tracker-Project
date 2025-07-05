@@ -2,6 +2,7 @@ from flask import jsonify, g
 from sqlalchemy import select
 from models import Expense
 from utils.extensions import async_session
+from utils.alert_user import check_and_notify
 
 async def create_expense(data):
     amount = data.get('amount')
@@ -20,13 +21,15 @@ async def create_expense(data):
         title = data.get("title")
 
         async with async_session() as session:
-            newExpense = Expense(title=title, amount=amount, category = categoryName, income=income, user_id=userId)
+            newExpense = Expense(title=title, amount=amount, category = categoryName, user_id=userId)
             session.add(newExpense)
             await session.commit()
+            await check_and_notify(g.current_user, session)
     
     except Exception as e:
         print(e)
         return jsonify(msg="Internal server Error aa raha"), 500
+    
     
     res = jsonify(msg="Expense added successfully", 
                   expense={
@@ -34,7 +37,6 @@ async def create_expense(data):
                       "amount": amount,
                       "category": categoryName,
                       "title": title,
-                      "income": income
                   })
     res.status_code = 200
     return res
@@ -63,7 +65,6 @@ async def read_expense(): #not pure async-orm and also not pure core-query
             "title": e.title,
             "amount": e.amount,
             "category": e.category,
-            "income": e.income,
             "timestamp": e.timestamp.isoformat()
         }
         for e in rows
@@ -76,10 +77,9 @@ async def edit_expense(data):
     expense_id = data.get('id')
     amount = data.get('amount')
     categoryName = data.get('categoryName')
-    income = data.get("income")
     title = data.get("title")
 
-    if not amount and not categoryName and not income and not title:
+    if not amount and not categoryName and not title:
         return jsonify(msg="Fields which has to be updating is missing")
     
     userId = g.current_user
@@ -101,23 +101,22 @@ async def edit_expense(data):
                 expense.amount = amount
             if categoryName is not None:
                 expense.category = categoryName
-            if income is not None:
-                expense.income = income
             if title is not None:
                 expense.title = title
 
             await session.commit()
+            await check_and_notify(g.current_user, session)
 
 
     except Exception as e:
         print(e)
         return jsonify(msg="Internal server Error"), 500
     
+    
     return jsonify(
             id=expense.id,
             amount=expense.amount,
             category=expense.category,
-            income=expense.income,
             title=expense.title,
             timestamp=expense.timestamp.isoformat()
         ), 200

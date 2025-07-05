@@ -3,6 +3,8 @@ from models import User
 from flask_jwt_extended import create_access_token, set_access_cookies
 from sqlalchemy.exc import IntegrityError
 from utils.extensions import async_session  # an AsyncSession factory
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 async def register_user(data):
     """Create a new user from JSON data {username, password}."""
@@ -42,6 +44,35 @@ async def register_user(data):
 
 
 async def login_user(data):
+    username = data.get("username")
+    password = data.get("password")
+    email    = data.get("email")
+    if not username or not password or not email:
+        return jsonify(msg="Missing fields"), 400
+
+    try:
+        async with async_session() as session:
+            result = await session.execute(
+                select(User)
+                .options(selectinload(User.expenses))
+                .where(User.username == username)
+            )
+            user = result.scalars().one_or_none()
+            if not user or not user.check_password(password):
+                return jsonify(msg="Invalid credentials"), 401
+
+            # Now this reflects the real number of expenses:
+            print(f"user {user.username} has {(user.expenses[0].category)} expenses")
+
+            access_token = create_access_token(identity=str(user.id))
+
+    except Exception:
+        return jsonify(msg="Internal server error"), 500
+
+    res = jsonify(msg="Logged in", access_token=access_token)
+    set_access_cookies(res, access_token)
+    return res, 200
+
     """
     Async version of user login.
     Expects data with 'username' and 'password', returns JWT on success.
@@ -67,6 +98,7 @@ async def login_user(data):
 
             # Create JWT token
             access_token = create_access_token(identity=str(user.id))
+            print(len(user.expenses))
     except Exception as e:
         return jsonify(msg="Internal server error"), 500
 

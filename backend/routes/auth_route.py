@@ -1,5 +1,5 @@
 # routes/auth_routes.py
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 from controllers.auth_controller import register_user, login_user
 from middlewares.auth_middleware import protectRoute
 # if __init__.py not used to import any file, then make sure that project root is on sys.path

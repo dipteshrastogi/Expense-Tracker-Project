@@ -15,7 +15,8 @@ async def register_user(data):
     try:
         async with async_session() as session:
             result = await session.execute(
-                User.__table__.select().where(User.username == username)
+                User.__table__.select().where(User.username == username) # doing core-query and not ORM 
+                # compliant ----- :(
             )
             if result.first():
                 return jsonify(msg="Username already exists"), 400

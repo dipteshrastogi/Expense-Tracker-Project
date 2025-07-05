@@ -19,7 +19,7 @@ def protectRoute(f):
             )
         
         if not token:
-            return jsonify(msg="Unauthorized user"), 401
+            return jsonify(msg="Unauthorized user kyu aa raha"), 401
 
         try:
             payload = jwt.decode(

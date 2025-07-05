@@ -4,15 +4,15 @@ from datetime import datetime
 
 
 class User(db.Model):
-    __tablename__ = 'user'
+    __tablename__ = 'users'
 
     id        = db.Column(db.Integer, primary_key=True)                # PK
     username  = db.Column(db.String(30), nullable=False, unique=True)
     email     = db.Column(db.String(120), nullable=False, unique=True)
     password_hash = db.Column(db.LargeBinary(60), nullable=False) #bcrypt hashes are bytes
 
-    # OPTIONAL: lets you do `u.categories` and `u.expenses`
-    categories = db.relationship('Category', backref='owner', lazy=True)
+    # OPTIONAL: lets you do u.categories and u.expenses
+    # categories = db.relationship('Category', backref='owner', lazy=True)
     expenses   = db.relationship('Expense',  backref='spender', lazy=True)
 
     def set_password(self, password: str):
@@ -29,20 +29,20 @@ class User(db.Model):
 
 
 
-class Category(db.Model):
-    __tablename__ = 'category'
+# class Category(db.Model):
+#     __tablename__ = 'category'
 
-    id       = db.Column(db.Integer, primary_key=True)                 # PK
-    name     = db.Column(db.String(50), nullable=False, unique=True)
-    icon     = db.Column(db.String(50))                                # e.g. "fa-utensils" or "🍔"
+#     id       = db.Column(db.Integer, primary_key=True)                 # PK
+#     name     = db.Column(db.String(50), nullable=False, unique=True)
+#     icon     = db.Column(db.String(50))                                # e.g. "fa-utensils" or "🍔"
 
-    user_id  = db.Column(
-        db.Integer,
-        db.ForeignKey('user.id'),          # ──► REQUIRED: links Category → User
-        nullable=False
-    )
+#     user_id  = db.Column(
+#         db.Integer,
+#         db.ForeignKey('user.id'),          # ──► REQUIRED: links Category → User
+#         nullable=False
+#     )
 
-    # `backref='owner'` on User.categories gives you category.owner
+    # backref='owner' on User.categories gives you category.owner
 
 
 
@@ -50,19 +50,23 @@ class Expense(db.Model):
     __tablename__ = 'expense'
 
     id          = db.Column(db.Integer, primary_key=True)             # PK
+    title       = db.Column(db.String(120),   nullable=False, default="Title")
     amount      = db.Column(db.Float,   nullable=False)
+    category    = db.Column(db.String(50), nullable=False)
+    income      = db.Column(db.String(50), nullable=False, default=0)
     timestamp   = db.Column(db.DateTime, default=datetime.utcnow)
+    
 
     user_id     = db.Column(
         db.Integer,
-        db.ForeignKey('user.id'),          # ──► REQUIRED: links Expense → User
+        db.ForeignKey('users.id'),          # ──► REQUIRED: links Expense → User
         nullable=False
     )
-    category_id = db.Column(
-        db.Integer,
-        db.ForeignKey('category.id'),      # ──► REQUIRED: links Expense → Category
-        nullable=False
-    )
+    # category_id = db.Column(
+    #     db.Integer,
+    #     db.ForeignKey('category.id'),      # ──► REQUIRED: links Expense → Category
+    #     nullable=False
+    # )
 
-    # OPTIONAL: lets you do `e.category` and `e.spender`
-    category    = db.relationship('Category', backref='expenses', lazy=True)
+    # OPTIONAL: lets you do e.category and e.spender
+    # category    = db.relationship('Category', backref='expenses', lazy=True)

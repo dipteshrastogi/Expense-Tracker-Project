@@ -6,20 +6,32 @@ const ProfilePage = ({ user }) => {
   const [formData, setFormData] = useState({
     fullName: user?.fullName || 'John Doe',
     email: user?.email || 'johndoe@example.com',
-    income: user?.income || 0,
-    totalExpenses: user?.totalExpenses || 0,
+    expenditure: user?.expenditure || 0,
+    target: user?.target || 0,
     description: user?.description || 'No description provided.',
     profilePhoto: user?.profilePhoto || 'https://via.placeholder.com/100',
     joinedDate: user?.joinedDate || '2024-01-01',
   });
+  const [newProfilePhoto, setNewProfilePhoto] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData((prev) => ({ ...prev, profilePhoto: reader.result }));
+        setNewProfilePhoto(file);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSave = () => {
-    // You can add logic to update user profile in DB here
     setIsEditing(false);
   };
 
@@ -27,7 +39,17 @@ const ProfilePage = ({ user }) => {
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-xl">
       <h1 className="text-3xl font-semibold text-gray-800 mb-6">Profile</h1>
       <div className="flex items-center space-x-6">
-        <img src={formData.profilePhoto} alt="Profile" className="w-24 h-24 rounded-full border" />
+        <div className="relative">
+          <img src={formData.profilePhoto} alt="Profile" className="w-24 h-24 rounded-full border object-cover" />
+          {isEditing && (
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              className="absolute top-0 left-0 w-24 h-24 opacity-0 cursor-pointer"
+            />
+          )}
+        </div>
         <div>
           {isEditing ? (
             <>
@@ -58,23 +80,35 @@ const ProfilePage = ({ user }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         <div className="p-4 bg-gray-100 rounded-lg">
-          <h3 className="text-sm text-gray-600">Monthly Income</h3>
+          <h3 className="text-sm text-gray-600">This Month's Expenditure</h3>
           {isEditing ? (
             <input
               type="number"
-              name="income"
-              value={formData.income}
+              name="expenditure"
+              value={formData.expenditure}
               onChange={handleChange}
-              className="text-lg font-semibold text-green-700 bg-white border rounded px-2 py-1 w-full"
+              className="text-lg font-semibold text-red-700 bg-white border rounded px-2 py-1 w-full"
             />
           ) : (
-            <p className="text-lg font-semibold text-green-700">₹{formData.income}</p>
+            <p className="text-lg font-semibold text-red-700">₹{formData.expenditure}</p>
           )}
         </div>
+
         <div className="p-4 bg-gray-100 rounded-lg">
-          <h3 className="text-sm text-gray-600">Total Expenses</h3>
-          <p className="text-lg font-semibold text-red-700">₹{formData.totalExpenses}</p>
+          <h3 className="text-sm text-gray-600">Monthly Saving Target</h3>
+          {isEditing ? (
+            <input
+              type="number"
+              name="target"
+              value={formData.target}
+              onChange={handleChange}
+              className="text-lg font-semibold text-blue-700 bg-white border rounded px-2 py-1 w-full"
+            />
+          ) : (
+            <p className="text-lg font-semibold text-blue-700">₹{formData.target}</p>
+          )}
         </div>
+
         <div className="md:col-span-2">
           <h3 className="text-sm text-gray-600 mb-2">About</h3>
           {isEditing ? (
@@ -88,6 +122,7 @@ const ProfilePage = ({ user }) => {
             <p className="text-gray-700 bg-gray-50 p-3 rounded-md border">{formData.description}</p>
           )}
         </div>
+
         <div className="md:col-span-2">
           <h3 className="text-sm text-gray-600 mb-2">Account Status</h3>
           <div className="flex items-center space-x-2">

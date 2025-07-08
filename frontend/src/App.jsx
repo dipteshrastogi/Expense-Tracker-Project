@@ -10,12 +10,11 @@ function App() {
 
   return (
     <>
-    ,
+    <DashboardPage/>
     <HistoryPage/>
     <SignInPage/>
     <SignUpPage/>
     <ProfilePage/>
-    <DashboardPage/>
     </>
   )
 }

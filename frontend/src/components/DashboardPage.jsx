@@ -5,6 +5,7 @@ const DashboardPage = ({ expenses = [] }) => {
   const [expenseList, setExpenseList] = useState(Array.isArray(expenses) ? expenses.slice(-6).reverse() : []);
   const [showNewRow, setShowNewRow] = useState(false);
   const [newExpense, setNewExpense] = useState({ name: '', amount: '', category: '', date: '' });
+  const [editingIndex, setEditingIndex] = useState(null);
 
   const handleAddClick = () => {
     setShowNewRow(true);
@@ -22,8 +23,25 @@ const DashboardPage = ({ expenses = [] }) => {
     setShowNewRow(false);
   };
 
-  const handleHistory = () => {
-    alert('Show full history here or navigate to a history page.');
+  const handleEdit = (index) => {
+    setEditingIndex(index);
+    setNewExpense(expenseList[index]);
+    setShowNewRow(false);
+  };
+
+  const handleDelete = (index) => {
+    const updatedList = [...expenseList];
+    updatedList.splice(index, 1);
+    setExpenseList(updatedList);
+  };
+
+  const handleUpdate = () => {
+    if (!newExpense.name || !newExpense.amount || !newExpense.category || !newExpense.date) return;
+    const updatedList = [...expenseList];
+    updatedList[editingIndex] = newExpense;
+    setExpenseList(updatedList);
+    setNewExpense({ name: '', amount: '', category: '', date: '' });
+    setEditingIndex(null);
   };
 
   return (
@@ -31,8 +49,8 @@ const DashboardPage = ({ expenses = [] }) => {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
         <button
-          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-          onClick={handleHistory}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          onClick={() => alert('History feature coming soon!')}
         >
           View History
         </button>
@@ -55,7 +73,7 @@ const DashboardPage = ({ expenses = [] }) => {
             </tr>
           </thead>
           <tbody>
-            {showNewRow && (
+            {(showNewRow || editingIndex !== null) && (
               <tr className="border-b bg-yellow-50">
                 <td className="px-4 py-2">
                   <input
@@ -97,12 +115,21 @@ const DashboardPage = ({ expenses = [] }) => {
                   />
                 </td>
                 <td className="px-4 py-2 space-x-2">
-                  <button
-                    onClick={handleSave}
-                    className="px-2 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600"
-                  >
-                    Save
-                  </button>
+                  {editingIndex !== null ? (
+                    <button
+                      onClick={handleUpdate}
+                      className="px-2 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Update
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleSave}
+                      className="px-2 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600"
+                    >
+                      Save
+                    </button>
+                  )}
                 </td>
               </tr>
             )}
@@ -113,8 +140,18 @@ const DashboardPage = ({ expenses = [] }) => {
                 <td className="px-4 py-2 text-gray-800">{exp.category}</td>
                 <td className="px-4 py-2 text-gray-800">{exp.date}</td>
                 <td className="px-4 py-2 flex space-x-2">
-                  <button className="px-2 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600">Edit</button>
-                  <button className="px-2 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
+                  <button
+                    className="px-2 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                    onClick={() => handleEdit(index)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="px-2 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                    onClick={() => handleDelete(index)}
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}

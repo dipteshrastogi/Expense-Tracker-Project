@@ -22,9 +22,21 @@ const DashboardPage = ({ expenses = [] }) => {
     setShowNewRow(false);
   };
 
+  const handleHistory = () => {
+    alert('Show full history here or navigate to a history page.');
+  };
+
   return (
     <div className="max-w-5xl mx-auto p-6 bg-white shadow-lg rounded-xl mt-6">
-      <h1 className="text-2xl font-semibold text-gray-800 mb-4">Dashboard</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
+        <button
+          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+          onClick={handleHistory}
+        >
+          View History
+        </button>
+      </div>
       <button
         className="mb-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
         onClick={handleAddClick}

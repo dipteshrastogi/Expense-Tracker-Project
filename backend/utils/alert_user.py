@@ -21,7 +21,7 @@ async def check_and_notify(user_id, session):
             "Expend money wisely !!!!\n"
         )
         msg = MIMEText(body)
-        msg["Subject"] = "🎉 Savings Milestone"
+        msg["Subject"] = " 🚨 Savings Alert"
         msg["From"]    = current_app.config["SMTP_USER"]
         msg["To"]      = user.email
 

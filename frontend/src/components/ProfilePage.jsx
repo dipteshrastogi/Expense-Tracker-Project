@@ -1,55 +1,88 @@
-// src/components/ProfilePage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useFirebase } from "../Firebase.jsx";
 
-const ProfilePage = ({ user }) => {
+const STATIC_PHOTO = 'https://cdn-icons-png.flaticon.com/512/847/847969.png';
+
+const ProfilePage = () => {
+  const { user } = useFirebase();
+  const userData = user?.userData?.[0] || {};
+
+  console.log(userData);
+
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: user?.fullName || 'John Doe',
-    email: user?.email || 'johndoe@example.com',
-    expenditure: user?.expenditure || 0,
-    target: user?.target || 0,
-    description: user?.description || 'No description provided.',
-    profilePhoto: user?.profilePhoto || 'https://via.placeholder.com/100',
+    fullName: userData.username || 'John Doe',
+    email: userData.email || 'johndoe@example.com',
+    expenditure: 0, // Will be updated via API
+    target: userData.target || 0,
+    description: userData?.description || 'No description provided.',
     joinedDate: user?.joinedDate || '2024-01-01',
   });
-  const [newProfilePhoto, setNewProfilePhoto] = useState(null);
+
+  // ✅ Fetch latest month total expenditure
+  useEffect(() => {
+    fetch("http://localhost:8000/api/expense/latestMonthTotal", {
+      credentials: "include",
+    })
+      .then(res => res.json())
+      .then(data => {
+        setFormData(prev => ({
+          ...prev,
+          expenditure: data.total || 0,
+        }));
+      })
+      .catch(err => {
+        console.error("Failed to fetch latest expenditure", err);
+      });
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData((prev) => ({ ...prev, profilePhoto: reader.result }));
-        setNewProfilePhoto(file);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsEditing(false);
+    // optionally send updated target/description to backend
+    try {
+    const response = await fetch("http://localhost:8000/api/auth/updateProfile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include", 
+      body: JSON.stringify({
+        username: formData.fullName,
+        email: formData.email,
+        description: formData.description,
+        target: formData.target,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      alert("Profile updated successfully!");
+      setIsEditing(false);
+    } else {
+      console.error("Failed to update:", result.msg);
+      alert("Failed to update profile: " + result.msg);
+    }
+  } catch (err) {
+    console.error("Error while saving profile:", err);
+    alert("Something went wrong while updating profile.");
+  }
   };
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-xl">
       <h1 className="text-3xl font-semibold text-gray-800 mb-6">Profile</h1>
       <div className="flex items-center space-x-6">
-        <div className="relative">
-          <img src={formData.profilePhoto} alt="Profile" className="w-24 h-24 rounded-full border object-cover" />
-          {isEditing && (
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoChange}
-              className="absolute top-0 left-0 w-24 h-24 opacity-0 cursor-pointer"
-            />
-          )}
-        </div>
+        <img
+          src={STATIC_PHOTO}
+          alt="Profile"
+          className="w-24 h-24 rounded-full border object-cover"
+        />
         <div>
           {isEditing ? (
             <>
@@ -95,7 +128,7 @@ const ProfilePage = ({ user }) => {
         </div>
 
         <div className="p-4 bg-gray-100 rounded-lg">
-          <h3 className="text-sm text-gray-600">Monthly Saving Target</h3>
+          <h3 className="text-sm text-gray-600">Monthly Income</h3>
           {isEditing ? (
             <input
               type="number"

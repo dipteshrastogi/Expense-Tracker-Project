@@ -19,7 +19,10 @@ def protectRoute(f):
             )
         
         if not token:
+            print("Kya be")
             return jsonify(msg="Unauthorized user kyu aa raha"), 401
+        
+        print("token here ", token)
 
         try:
             payload = jwt.decode(
@@ -27,8 +30,10 @@ def protectRoute(f):
                 current_app.config['JWT_SECRET_KEY'],
                 algorithms=[ current_app.config.get('JWT_ALGORITHM', 'HS256') ]
             )
+            print("Dip", payload)
         
         except jwt.ExpiredSignatureError:
+            print("Token expired")
             return jsonify(msg="Token has expired"), 401
         except jwt.InvalidTokenError:
             return jsonify(msg="Invalid token"), 401

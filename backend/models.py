@@ -11,6 +11,7 @@ class User(db.Model):
     email     = db.Column(db.String(120), nullable=False, unique=True)
     password_hash = db.Column(db.LargeBinary(60), nullable=False) #bcrypt hashes are bytes
     income      = db.Column(db.String(50), nullable=False, default=0)
+    description  = db.Column(db.String(200), nullable=False, default='')
 
     # OPTIONAL: lets you do u.categories and u.expenses
     # categories = db.relationship('Category', backref='owner', lazy=True)

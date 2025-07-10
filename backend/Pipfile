@@ -7,13 +7,13 @@ name = "pypi"
 flask-sqlalchemy = "*"
 flask-jwt-extended = "*"
 requests = "*"
-flask = ">=2.0"
 asgiref = "*"
 uvicorn = "*"
 python-dotenv = "*"
 flask-cors = "*"
 aiosqlite = "*"
 bcrypt = "*"
+flask = "*"
 
 [dev-packages]
 

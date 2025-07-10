@@ -1,3 +1,4 @@
+from datetime import timedelta
 from dotenv import load_dotenv
 load_dotenv()
 import os
@@ -15,6 +16,7 @@ class Config:
     SMTP_PORT        = int(os.getenv("SMTP_PORT", 587))
     SMTP_USER        = os.getenv("SMTP_USER", "")
     SMTP_PASS        = os.getenv("SMTP_PASS", "")
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=2) 
 
     # Savings threshold (numeric)
     SAVINGS_THRESHOLD = float(os.getenv("SAVINGS_THRESHOLD", 5000.0))

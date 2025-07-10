@@ -15,7 +15,7 @@ app.config.from_object(
 # Flask‑JWT‑Extended picks up that JWT_SECRET_KEY from app.config.
 
 allowed_origins = [
-    "http://localhost:5000"
+    "http://localhost:5173"
 ]
 
 db = SQLAlchemy(app)
@@ -32,7 +32,7 @@ with app.app_context():
 from routes.auth_route import auth_bp
 from routes.expense_route import expense_bp
 
-CORS(app, origins = allowed_origins)
+CORS(app, origins = allowed_origins, supports_credentials=True)
 
 print(app.config["SQLALCHEMY_DATABASE_URI"])
 
